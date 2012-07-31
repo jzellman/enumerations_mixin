@@ -14,7 +14,11 @@ module ActiveRecord
           valid_keys = [:conditions, :order, :on_lookup_failure]
           options.assert_valid_keys(*valid_keys)
           valid_keys.each do |key|
-            write_inheritable_attribute("acts_enumerated_#{key.to_s}".to_sym, options[key]) if options.has_key? key
+            key_name = "acts_enumerated_#{key.to_s}".to_sym
+            self.class_attribute key_name
+            if options.has_key? key
+              self.send "#{key_name}=".to_sym, options[key]
+            end
           end
           
           unless self.is_a? ActiveRecord::Acts::Enumerated::ClassMethods
@@ -35,8 +39,8 @@ module ActiveRecord
         def all
           return @all if @all
           @all = find(:all,
-                      :conditions => read_inheritable_attribute(:acts_enumerated_conditions),
-                      :order => read_inheritable_attribute(:acts_enumerated_order)
+                      :conditions => self.acts_enumerated_conditions, 
+                      :order => self.acts_enumerated_order
                       ).collect{|val| val.freeze}.freeze
         end
 
@@ -53,7 +57,7 @@ module ActiveRecord
           else
             raise TypeError, "#{self.name}[]: argument should be a String, Symbol or Fixnum but got a: #{arg.class.name}"
           end
-          self.send((read_inheritable_attribute(:acts_enumerated_on_lookup_failure) || :enforce_strict_literals), arg)
+          self.send((self.class.acts_enumerated_on_lookup_failure || :enforce_strict_literals), arg)
         end
 
         def lookup_id(arg)
