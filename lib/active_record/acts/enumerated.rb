@@ -57,7 +57,7 @@ module ActiveRecord
           else
             raise TypeError, "#{self.name}[]: argument should be a String, Symbol or Fixnum but got a: #{arg.class.name}"
           end
-          self.send((self.class.acts_enumerated_on_lookup_failure || :enforce_strict_literals), arg)
+          self.send((self.acts_enumerated_on_lookup_failure || :enforce_strict_literals), arg)
         end
 
         def lookup_id(arg)
